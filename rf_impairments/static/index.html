@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LTE RF Impairments</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12h3l2-6 4 12 3-9 2 3h6"/></svg>
+      <div>
+        <h1>LTE RF Impairments</h1>
+        <p>Constellation of one received packet through a dirty-RF chain</p>
+      </div>
+    </div>
+    <button id="theme" class="icon-btn" title="Toggle theme" aria-label="Toggle theme">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </header>
+
+  <main class="layout">
+    <form id="controls" class="panel" autocomplete="off">
+      <section>
+        <h2>Signal</h2>
+        <label class="field">Transmission
+          <select name="transmission" id="transmission"></select>
+        </label>
+        <div class="field">Modulation
+          <div class="segmented" id="modulation" role="radiogroup"></div>
+        </div>
+        <label class="field check">
+          <input type="checkbox" name="random_data">
+          <span>Random payload <small>(original sends all-zero bits)</small></span>
+        </label>
+      </section>
+
+      <section>
+        <h2>Timing &amp; frequency</h2>
+        <label class="field">Sampling frequency offset
+          <select name="sco_ppm" class="ppm"></select>
+        </label>
+        <label class="field">Carrier frequency offset
+          <select name="cfo_ppm" class="ppm"></select>
+        </label>
+        <label class="field">Sampling time offset <output id="t_offset_out">0.00 samples</output>
+          <input type="range" name="t_offset" min="-1" max="1" step="any" value="0">
+        </label>
+        <label class="field">Phase offset <output id="phase_out">0°</output>
+          <input type="range" name="phase_deg" min="0" max="360" step="any" value="0">
+        </label>
+      </section>
+
+      <section>
+        <h2>IQ imbalance &amp; DC offset</h2>
+        <div class="grid2">
+          <label class="field">Amplitude (lin)<input type="number" name="amp_imbal" step="any" value="0"></label>
+          <label class="field">Phase (deg)<input type="number" name="phs_imbal" step="0.5" value="0"></label>
+          <label class="field">DC offset I<input type="number" name="dc_i" step="any" value="0"></label>
+          <label class="field">DC offset Q<input type="number" name="dc_q" step="any" value="0"></label>
+        </div>
+      </section>
+
+      <section>
+        <h2>Phase noise &amp; AWGN</h2>
+        <div class="grid2">
+          <label class="field">Level (dBc/Hz)<input type="number" name="pn_level" step="1" max="0" value="-120"></label>
+          <label class="field">Freq. offset (Hz)<input type="number" name="pn_fo" step="10" min="0" value="100"></label>
+        </div>
+        <label class="field">SNR <output id="snr_out">∞ (noiseless)</output>
+          <input type="range" id="snr" min="0" max="51" step="1" value="51">
+        </label>
+      </section>
+    </form>
+
+    <section class="stage">
+      <div class="toolbar">
+        <button type="button" id="run" class="btn primary" title="Simulate the next packet (Enter)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l13-8z"/></svg>Run
+        </button>
+        <button type="button" id="play" class="btn" title="Run packets continuously (Space)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4l8 8-8 8M12 4l8 8-8 8"/></svg><span>Animate</span>
+        </button>
+        <button type="button" id="reset" class="btn ghost" title="Reset offsets and clear the plot">Reset</button>
+        <label class="toggle"><input type="checkbox" id="persist"><span>Persistence</span></label>
+        <label class="toggle"><input type="checkbox" id="autorun" checked><span>Run on change</span></label>
+      </div>
+
+      <div class="plot-wrap">
+        <canvas id="plot" aria-label="IQ constellation"></canvas>
+        <div class="legend">
+          <span><i class="dot rx"></i>Received</span>
+          <span><i class="dot ideal"></i>Ideal points</span>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><span>EVM (rms)</span><strong id="evm">–</strong></div>
+        <div class="stat"><span>EVM (dB)</span><strong id="evm_db">–</strong></div>
+        <div class="stat"><span>Next time offset</span><strong id="stat_t">–</strong></div>
+        <div class="stat"><span>Next phase</span><strong id="stat_p">–</strong></div>
+        <div class="stat"><span>Packets</span><strong id="stat_n">0</strong></div>
+      </div>
+      <p id="error" class="error" hidden></p>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

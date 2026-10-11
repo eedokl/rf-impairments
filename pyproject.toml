@@ -1,0 +1,27 @@
+[project]
+name = "rf-impairments"
+version = "0.1.0"
+description = "LTE RF impairments constellation simulator (port of the MATLAB rf_impairments GUI)"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.142.4",
+    "numpy>=2.4.6",
+    "scipy>=1.17.1",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx2>=2.13.1",
+    "pytest>=9.1.1",
+]
+
+[project.scripts]
+rf-impairments = "rf_impairments.app:main"
+
+[build-system]
+requires = ["uv_build>=0.11,<0.12"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-root = ""

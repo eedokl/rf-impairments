@@ -1,0 +1,495 @@
+function varargout = rf_impairments(varargin)
+% RF_IMPAIRMENTS M-file for rf_impairments.fig
+%      RF_IMPAIRMENTS, by itself, creates a new RF_IMPAIRMENTS or raises the existing
+%      singleton*.
+%
+%      H = RF_IMPAIRMENTS returns the handle to a new RF_IMPAIRMENTS or the handle to
+%      the existing singleton*.
+%
+%      RF_IMPAIRMENTS('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in RF_IMPAIRMENTS.M with the given input arguments.
+%
+%      RF_IMPAIRMENTS('Property','Value',...) creates a new RF_IMPAIRMENTS or raises the
+%      existing singleton*.  Starting from the left, property value pairs are
+%      applied to the GUI before rf_impairments_OpeningFunction gets called.  An
+%      unrecognized property name or invalid value makes property application
+%      stop.  All inputs are passed to rf_impairments_OpeningFcn via varargin.
+%
+%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
+%      instance to run (singleton)".
+%
+% See also: GUIDE, GUIDATA, GUIHANDLES
+
+% Edit the above text to modify the response to help rf_impairments
+
+% Last Modified by GUIDE v2.5 26-Dec-2006 19:28:51
+
+% Begin initialization code - DO NOT EDIT
+gui_Singleton = 1;
+gui_State = struct('gui_Name',       mfilename, ...
+                   'gui_Singleton',  gui_Singleton, ...
+                   'gui_OpeningFcn', @rf_impairments_OpeningFcn, ...
+                   'gui_OutputFcn',  @rf_impairments_OutputFcn, ...
+                   'gui_LayoutFcn',  [] , ...
+                   'gui_Callback',   []);
+if nargin && ischar(varargin{1})
+    gui_State.gui_Callback = str2func(varargin{1});
+end
+
+if nargout
+    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
+else
+    gui_mainfcn(gui_State, varargin{:});
+end
+% End initialization code - DO NOT EDIT
+
+% --- Executes just before rf_impairments is made visible.
+function rf_impairments_OpeningFcn(hObject, eventdata, handles, varargin)
+% This function has no output args, see OutputFcn.
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% varargin   command line arguments to rf_impairments (see VARARGIN)
+
+% Choose default command line output for rf_impairments
+handles.output = hObject;
+
+% Update handles structure
+guidata(hObject, handles);
+
+% This sets up the initial plot - only do when we are invisible
+% so window can get raised using rf_impairments.
+if strcmp(get(hObject,'Visible'),'off')
+    plot(rand(5));
+end
+set(handles.text_cfo,'Value',0);
+% UIWAIT makes rf_impairments wait for user response (see UIRESUME)
+% uiwait(handles.figure1);
+
+
+% --- Outputs from this function are returned to the command line.
+function varargout = rf_impairments_OutputFcn(hObject, eventdata, handles)
+% varargout  cell array for returning output args (see VARARGOUT);
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Get default command line output from handles structure
+varargout{1} = handles.output;
+
+% --- Executes on button press in pushbutton1.
+function pushbutton1_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+axes(handles.axes1);
+cla;
+popup_sel_index = get(handles.popupmenu_ofdm, 'Value');
+switch popup_sel_index
+    case 1, OFDM_ON=1;
+    case 2, OFDM_ON=0;
+end
+popup_sel_index = get(handles.popupmenu1, 'Value');
+switch popup_sel_index
+    case 1, M=2;
+    case 2, M=4;
+    case 3, M=16;
+    case 4, M=64;
+end
+popup_sel_index = get(handles.popupmenu_sco, 'Value');
+switch popup_sel_index
+    case 1, SCO=0.0;
+    case 2, SCO=0.1;
+    case 3, SCO=1.0;
+    case 4, SCO=10;
+    case 5, SCO=15;
+    case 6, SCO=50;
+    case 7, SCO=100;
+    case 8, SCO=-0.1;
+    case 9, SCO=-1.0;
+    case 10, SCO=-10;
+    case 11, SCO=-15;
+    case 12, SCO=-50;
+    case 13, SCO=-100;
+end
+popup_sel_index = get(handles.popupmenu_cfo, 'Value');
+switch popup_sel_index
+    case 1, CFO=0.0;
+    case 2, CFO=0.1;
+    case 3, CFO=1.0;
+    case 4, CFO=10;
+    case 5, CFO=15;
+    case 6, CFO=50;
+    case 7, CFO=100;
+    case 8, CFO=-0.1;
+    case 9, CFO=-1.0;
+    case 10, CFO=-10;
+    case 11, CFO=-15;
+    case 12, CFO=-50;
+    case 13, CFO=-100;
+end
+t_offset = get(handles.slider_toffset, 'Value');
+phase_offset = get(handles.slider_phase,'Value')/180*pi;
+
+PN_LEVEL = str2num(get(handles.edit_pnlevel,'String'));
+if isempty(PN_LEVEL), PN_LEVEL = -120; end
+if PN_LEVEL>0, PN_LEVEL=0; end
+set(handles.edit_pnlevel,'String',PN_LEVEL)
+
+PN_FO = str2num(get(handles.edit_pnfo,'String'));
+if isempty(PN_FO), PN_FO = 0; end
+if PN_FO<0, PN_FO=0; end
+set(handles.edit_pnfo,'String',PN_FO)
+
+ampImbal = str2num(get(handles.edit_ampImbal,'String'));
+if isempty(ampImbal), ampImbal = 0; end
+set(handles.edit_ampImbal,'String',ampImbal)
+
+phsImbal = str2num(get(handles.edit_phsImbal,'String'));
+if isempty(phsImbal), phsImbal = 0; end
+set(handles.edit_phsImbal,'String',phsImbal)
+
+[iqdata,t_offset,phase_offset] = samp_clock_offset_simulation_function(...
+    0,...
+    M,...
+    SCO,...
+    t_offset,...
+    CFO,...
+    phase_offset,...
+    OFDM_ON,...
+    PN_LEVEL,...
+    PN_FO,...
+    ampImbal,...
+    phsImbal);
+phase_offset = mod(phase_offset,2*pi);
+if t_offset>1, t_offset = 1; end
+if t_offset<-1, t_offset = -1; end
+set(handles.slider_phase,'Value',round(phase_offset/pi*180));
+set(handles.slider_toffset, 'Value',t_offset);
+set(handles.text_cfo,'Value',phase_offset);
+set(handles.text_toffset,'String',sprintf('Time Offset = %4.2f samples',get(handles.slider_toffset,'Value')));
+set(handles.text_phase,'String',sprintf('Phase Offset = %d degree',get(handles.slider_phase,'Value')));
+plot(iqdata,'x'); axis([-1 1 -1 1]*sqrt(2)); grid on;
+
+% --------------------------------------------------------------------
+function FileMenu_Callback(hObject, eventdata, handles)
+% hObject    handle to FileMenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function OpenMenuItem_Callback(hObject, eventdata, handles)
+% hObject    handle to OpenMenuItem (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+file = uigetfile('*.fig');
+if ~isequal(file, 0)
+    open(file);
+end
+
+% --------------------------------------------------------------------
+function PrintMenuItem_Callback(hObject, eventdata, handles)
+% hObject    handle to PrintMenuItem (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+printdlg(handles.figure1)
+
+% --------------------------------------------------------------------
+function CloseMenuItem_Callback(hObject, eventdata, handles)
+% hObject    handle to CloseMenuItem (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+selection = questdlg(['Close ' get(handles.figure1,'Name') '?'],...
+                     ['Close ' get(handles.figure1,'Name') '...'],...
+                     'Yes','No','Yes');
+if strcmp(selection,'No')
+    return;
+end
+
+delete(handles.figure1)
+
+
+% --- Executes on selection change in popupmenu1.
+function popupmenu1_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = get(hObject,'String') returns popupmenu1 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu1
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc
+    set(hObject,'BackgroundColor','white');
+else
+    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+end
+
+set(hObject, 'String', {'BPSK', 'QPSK', '16-QAM', '64-QAM'});
+
+
+
+
+function edit_sco_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_sco (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_sco as text
+%        str2double(get(hObject,'String')) returns contents of edit_sco as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_sco_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_sco (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in popupmenu_sco.
+function popupmenu_sco_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu_sco (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = get(hObject,'String') returns popupmenu_sco contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu_sco
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu_sco_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu_sco (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+
+% --- Executes on slider movement.
+function slider_toffset_Callback(hObject, eventdata, handles)
+% hObject    handle to slider_toffset (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+value = round(get(hObject,'Value')*100)/100;
+set(handles.text_toffset,'String',sprintf('Time Offset = %4.2f samples',value));
+set(hObject,'Value',value);
+
+
+% --- Executes during object creation, after setting all properties.
+function slider_toffset_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to slider_toffset (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+
+
+% --- Executes on selection change in popupmenu_cfo.
+function popupmenu_cfo_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu_cfo (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = get(hObject,'String') returns popupmenu_cfo contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu_cfo
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu_cfo_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu_cfo (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+
+% --- Executes on button press in pushbutton_reset.
+function pushbutton_reset_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton_reset (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on slider movement.
+function slider_phase_Callback(hObject, eventdata, handles)
+% hObject    handle to slider_phase (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+value = round(get(hObject,'Value'));
+set(handles.text_phase,'String',sprintf('Phase Offset = %d degree',value));
+set(hObject,'Value',value);
+
+
+% --- Executes during object creation, after setting all properties.
+function slider_phase_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to slider_phase (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+
+
+% --- Executes on selection change in popupmenu_ofdm.
+function popupmenu_ofdm_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu_ofdm (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = get(hObject,'String') returns popupmenu_ofdm contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu_ofdm
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu_ofdm_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu_ofdm (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+
+
+function edit_pnlevel_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_pnlevel (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_pnlevel as text
+%        str2double(get(hObject,'String')) returns contents of edit_pnlevel as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_pnlevel_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_pnlevel (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+
+
+function edit_pnfo_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_pnfo (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_pnfo as text
+%        str2double(get(hObject,'String')) returns contents of edit_pnfo as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_pnfo_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_pnfo (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+
+
+function edit_ampImbal_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_ampImbal (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_ampImbal as text
+%        str2double(get(hObject,'String')) returns contents of edit_ampImbal as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_ampImbal_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_ampImbal (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit_phsImbal_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_phsImbal (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_phsImbal as text
+%        str2double(get(hObject,'String')) returns contents of edit_phsImbal as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_phsImbal_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_phsImbal (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
